@@ -29,11 +29,36 @@ const Column = {
      columnElement.addEventListener('dragstart', Column.dragstart);
      columnElement.addEventListener('dragend', Column.dragend);
 
-     columnElement.addEventListener('dragenter', Column.dragenter);
+
      columnElement.addEventListener('dragover', Column.dragover);
-     columnElement.addEventListener('dragleave', Column.dragleave);
+
 
      columnElement.addEventListener('drop', Column.drop);
+
+   },
+
+  create(id = null) {
+    
+    const columnElement = document.createElement('div');
+    columnElement.classList.add('column');
+    columnElement.setAttribute('draggable', 'true');
+
+    if (id) {
+      columnElement.setAttribute('data-column-id', id);
+
+    } else {
+      columnElement.setAttribute('data-column-id', Column.idCounter);
+      Column.idCounter++;
+    }
+    
+    columnElement.innerHTML = `
+      <p class="column-header">В плане</p>
+          <div data-notes></div>
+      <p class="column-footer"><span data-action-addNote class="action">+Добавить карточку</span></p>`
+
+    Column.process(columnElement);
+    
+    return columnElement;
 
    },
 
@@ -47,27 +72,18 @@ const Column = {
 
       event.stopPropagation();
    },
-   
-   dragenter(event) {
-       if (!Column.dragged || this === Column.dragged) return;
 
-       this.classList.add('under');
-       console.log(event);
-     },
+   dragover(event) { 
+    event.preventDefault();
+    event.stopPropagation();
 
-   dragover(event) {
-      event.preventDefault();
-      if (!Column.dragged || this === Column.dragged) return;
-      console.log(event);
+    if (!Column.dragged || this === Column.dragged) return;
 
-      event.stopPropagation();
-   },
+    document
+      .querySelectorAll('.column')
+      .forEach(columnElement => columnElement.classList.remove('under'));
 
-   dragleave(event) {
-      if (!Column.dragged || this === Column.dragged) return;
-
-      this.classList.remove('under');
-      console.log(event);
+    this.classList.add('under');
    },
 
    dragend(event) {
@@ -85,7 +101,18 @@ const Column = {
        return this.querySelector('[data-notes]').append(Note.dragged);
        
      } else if (Column.dragged) {
-        console.log('drop Column');
+        const children = Array.from(document.querySelector('.columns').children);
+        const indexA = children.indexOf(this);
+        const indexB = children.indexOf(Column.dragged);
+        if (indexA < indexB) {
+          document.querySelector('.columns').insertBefore(Column.dragged, this);
+        } else {
+          document.querySelector('.columns').insertBefore(Column.dragged, this.nextElementSibling);
+        }
+        document
+          .querySelectorAll('.column')
+          .forEach(columnElement => columnElement.classList.remove('under'));
+
      }
    },
 

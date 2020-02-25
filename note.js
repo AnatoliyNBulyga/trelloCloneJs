@@ -1,5 +1,5 @@
 const Note = {
-   noteIdCounter: 8,
+   idCounter: 8,
    dragged: null,
    process(noteElement) {
       noteElement.addEventListener('dblclick', event => {
@@ -25,13 +25,20 @@ const Note = {
       noteElement.addEventListener('drop', Note.drop);
    },
 
-   create() {
+   create(id = null, content = '') {
       const noteElement = document.createElement("div");
       noteElement.classList.add('note');
       noteElement.setAttribute('draggable', true);
-      noteElement.setAttribute('data-note-id', Note.noteIdCounter);
+      noteElement.textContent = content;
 
-      Note.noteIdCounter++;
+      if (id) {
+         noteElement.setAttribute('data-note-id', id);
+
+      } else {
+         noteElement.setAttribute('data-note-id', Note.idCounter);
+         Note.idCounter++;
+      }
+
       Note.process(noteElement);
 
       return noteElement;
