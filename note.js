@@ -1,81 +1,119 @@
-const Note = {
-   noteIdCounter: 8,
-   dragged: null,
-   process(noteElement) {
-      noteElement.addEventListener('dblclick', event => {
-        noteElement.setAttribute('contenteditable', true);
-        noteElement.removeAttribute('draggable');
-        noteElement.closest('.column').removeAttribute('draggable');
+class Note {
 
-        noteElement.focus();
+   constructor(id = null, content = '') {
+      const instance = this;
+      const element = this.element = document.createElement("div");
+
+      element.classList.add('note');
+      element.setAttribute('draggable', true);
+      element.textContent = content;
+
+      if (id) {
+        element.setAttribute('data-note-id', id);
+
+      } else {
+        element.setAttribute('data-note-id', Note.idCounter);
+        Note.idCounter++;
+      }
+
+      element.addEventListener('dblclick', event => {
+        element.setAttribute('contenteditable', true);
+        element.removeAttribute('draggable');
+        instance.column.removeAttribute('draggable');
+
+        element.focus();
       });
-      noteElement.addEventListener('blur', evetn => {
-        noteElement.removeAttribute('contenteditable');
-        noteElement.setAttribute('draggable', true);
-        noteElement.closest('.column').setAttribute('draggable', true);
 
-        !noteElement.textContent.trim().length && noteElement.remove();
+      element.addEventListener('blur', evetn => {
+
+        element.removeAttribute('contenteditable');
+        element.setAttribute('draggable', true);
+        instance.column.setAttribute('draggable', true);
+
+        if (!element.textContent.trim().length) {
+          element.remove();
+          Note.idCounter--;
+        }
+
+        Application.save();
+
       });
 
-      noteElement.addEventListener('dragstart', Note.dragstart);
-      noteElement.addEventListener('dragend', Note.dragend);
-      noteElement.addEventListener('dragenter', Note.dragenter);
-      noteElement.addEventListener('dragover', Note.dragover);
-      noteElement.addEventListener('dragleave', Note.dragleave);
-      noteElement.addEventListener('drop', Note.drop);
+      element.addEventListener('dragstart', this.dragstart.bind(this));
+      element.addEventListener('dragend', this.dragend.bind(this));
+      element.addEventListener('dragenter', this.dragenter.bind(this));
+      element.addEventListener('dragover', this.dragover.bind(this));
+      element.addEventListener('dragleave', this.dragleave.bind(this));
+      element.addEventListener('drop', this.drop.bind(this));
 
-   },
+   }
+
+   get column () {
+      return this.element.closest('.column');
+   }
 
    dragstart(event) {
-     Note.dragged = this;
-     this.classList.add('dragged');
-   },
+      Note.dragged = this.element;
+      this.element.classList.add('dragged');
+      event.stopPropagation();
+   }
 
    dragend(event) {
-     Note.dragged = null;
-     this.classList.remove('dragged');
-     document
-       .querySelectorAll('.note')
-       .forEach(elem => {
-         elem.classList.remove('under');
-       })
-   },
+      Note.dragged = null;
+      this.element.classList.remove('dragged');
+      document
+      .querySelectorAll('.note')
+      .forEach(elem => elem.classList.remove('under'));
+
+      event.stopPropagation();
+
+      Application.save();
+   }
 
    dragenter(event) {
-     if (this === Note.dragged) return
-     this.classList.add('under');
-   },
+      if (!Note.dragged || this.element.element === Note.dragged) return
+      this.element.classList.add('under');
+
+      event.stopPropagation();
+   }
 
    dragover(event) {
-     event.preventDefault();
-     if (this === Note.dragged) return
-   },
+      if (!Note.dragged || this.element === Note.dragged) return
+      event.preventDefault();
+   }
 
    dragleave(event) {
-     if (this === Note.dragged) return
-     this.classList.remove('under');
-   },
+
+      if (!Note.dragged || this.element === Note.dragged) return
+      this.element.classList.remove('under');
+
+      event.stopPropagation();
+   }
 
    drop(event) {
-     event.stopPropagation();
 
-     if (this === Note.dragged) return
+      if (!Note.dragged || this.element === Note.dragged) return
 
-     if (this.parentElement === Note.dragged.parentElement) {
-       const note = Array.from(this.parentElement.querySelectorAll('.note'));
-       const indexA = note.indexOf(this);
-       const indexB = note.indexOf(Note.dragged);
+      if (this.element.parentElement === Note.dragged.parentElement) {
+      const note = Array.from(this.element.parentElement.querySelectorAll('.note'));
+      const indexA = note.indexOf(this.element);
+      const indexB = note.indexOf(Note.dragged);
 
-       indexA < indexB ?
-         this.parentElement.insertBefore(Note.dragged, this) :
-         this.parentElement.insertBefore(Note.dragged, this.nextElementSibling);
+      indexA < indexB 
+         ? this.element.parentElement.insertBefore(Note.dragged, this.element) 
+         : this.element.parentElement.insertBefore(Note.dragged, this.element.nextElementSibling);
 
-     } else {
-       this.parentElement.insertBefore(Note.dragged, this);
-     }
-   },
+      } else {
+         this.element.parentElement.insertBefore(Note.dragged, this.element);
+      }
+      event.stopPropagation();
+   }
 
 }
+
+Note.idCounter = 8
+Note.dragend = null
+
 
 
 

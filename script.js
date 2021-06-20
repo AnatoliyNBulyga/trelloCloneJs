@@ -1,27 +1,24 @@
+Application.load();
 
-document
-   .querySelectorAll('.column')
-   .forEach( Column.process );
+// if (!localStorage.getItem('trello')) {
+//    document
+//    .querySelectorAll('.column')
+//    .forEach(Column.process);
+
+//    document
+//       .querySelectorAll('.note')
+//       .forEach(Note.process);
+// }
+   
 
 document
    .querySelector('[data-action-addColumn]')
    .addEventListener('click', event => {
-      const columnElement = document.createElement('div');
-      columnElement.classList.add('column');
-      columnElement.setAttribute('draggable', 'true');
-      columnElement.setAttribute('data-column-id', Column.idCounter);
+      const column = new Column;
 
-      Column.idCounter++;
-      columnElement.innerHTML = `
-         <p class="column-header">В плане</p>
-            <div data-notes></div>
-         <p class="column-footer"><span data-action-addNote class="action">+Добавить карточку</span></p>`
+      document.querySelector('.columns').append(column.element);
 
-      document.querySelector('.columns').append(columnElement);
-      Column.process(columnElement);
+      Application.save();
 
-   });
-
-document
-   .querySelectorAll('.note')
-   .forEach( Note.process );   
+   }); 
+   
