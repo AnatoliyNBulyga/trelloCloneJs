@@ -1,14 +1,14 @@
 Application.load();
 
-// if (!localStorage.getItem('trello')) {
-//    document
-//    .querySelectorAll('.column')
-//    .forEach(Column.process);
+if (!localStorage.getItem('trello')) {
+   document
+   .querySelectorAll('.column')
+   .forEach(Column.process);
 
-//    document
-//       .querySelectorAll('.note')
-//       .forEach(Note.process);
-// }
+   document
+      .querySelectorAll('.note')
+      .forEach(Note.process);
+}
    
 
 document
